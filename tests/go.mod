@@ -1,4 +1,4 @@
-module gorm.io/gen/tests
+module github.com/jackie1in/gen/tests
 
 go 1.16
 

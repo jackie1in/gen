@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jackie1in/gen"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
-	"gorm.io/gen"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -70,7 +70,7 @@ func OpenTestConnection() (db *gorm.DB, err error) {
 	if err != nil {
 		return
 	}
-	
+
 	if debug := os.Getenv("DEBUG"); debug == "true" {
 		db.Logger = db.Logger.LogMode(logger.Info)
 	} else if debug == "false" {
