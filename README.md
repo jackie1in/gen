@@ -22,6 +22,61 @@ Friendly & Safer GORM powered by Code Generation.
 * Gen Guides [https://gorm.io/gen/index.html](https://gorm.io/gen/index.html)
 * GORM Guides [http://gorm.io/docs](http://gorm.io/docs)
 
+## Usage
+
+Create a generator with `gen.Config`, then generate models and query code:
+
+```go
+package main
+
+import (
+	"gorm.io/driver/mysql"
+	"gorm.io/gen"
+	"gorm.io/gorm"
+)
+
+func main() {
+	db, _ := gorm.Open(mysql.Open("user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True"), &gorm.Config{})
+
+	cfg := gen.Config{
+		OutPath:      "./dal/query",
+		ModelPkgPath: "./dal/model",
+		Mode:         gen.WithDefaultQuery | gen.WithQueryInterface,
+	}
+
+	g := gen.NewGenerator(cfg)
+	g.UseDB(db)
+	g.GenerateAllTable()
+	g.Execute()
+}
+```
+
+## Soft delete
+
+By default, a column named `deleted_at` with type `time.Time` is generated as `gorm.DeletedAt`. For custom columns use:
+
+| Need | Config |
+|------|--------|
+| Default `deleted_at` | Don’t call any soft-delete option |
+| Flag only (e.g. `is_delete` 0/1) | `cfg.WithSoftDeleteFlag("is_delete")` |
+| Time only (e.g. `update_time` as delete time) | `cfg.WithSoftDeleteAt("update_time")` |
+| Flag + time (mixed) | `cfg.WithSoftDeleteFlag("is_delete")` and `cfg.WithSoftDeleteAt("update_time")` |
+
+Example:
+
+```go
+cfg := gen.Config{OutPath: "./query", ModelPkgPath: "./model"}
+cfg.WithSoftDeleteFlag("is_delete")
+cfg.WithSoftDeleteAt("update_time")
+
+g := gen.NewGenerator(cfg)
+g.UseDB(db)
+g.GenerateAllTable()
+g.Execute()
+```
+
+See [GORM Soft Delete](https://gorm.io/docs/delete.html#Soft-Delete) and `gorm.io/plugin/soft_delete` for mixed mode.
+
 ## Maintainers
 
 [@riverchu](https://github.com/riverchu) [@iDer](https://github.com/idersec) [@qqxhb](https://github.com/qqxhb) [@dino-ma](https://github.com/dino-ma)
