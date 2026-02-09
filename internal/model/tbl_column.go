@@ -43,14 +43,17 @@ func (c *Column) WithNS(jsonTagNS func(columnName string) string) {
 	}
 }
 
-// ToField convert to field
-func (c *Column) ToField(nullable, coverable, signable bool) *Field {
+// ToField convert to field. When softDeleteTimeColumn is set (custom soft delete), "deleted_at" is not converted to gorm.DeletedAt.
+func (c *Column) ToField(nullable, coverable, signable bool, softDeleteTimeColumn string) *Field {
 	fieldType := c.GetDataType()
 	if signable && strings.Contains(c.columnType(), "unsigned") && strings.HasPrefix(fieldType, "int") {
 		fieldType = "u" + fieldType
 	}
 	switch {
-	case c.Name() == "deleted_at" && fieldType == "time.Time":
+	case c.Name() == "deleted_at" && fieldType == "time.Time" && softDeleteTimeColumn == "":
+		fieldType = "gorm.DeletedAt"
+	case softDeleteTimeColumn != "" && c.Name() == softDeleteTimeColumn && fieldType == "time.Time":
+		// Only time column (no flag): use gorm.DeletedAt with custom column name, e.g. update_time
 		fieldType = "gorm.DeletedAt"
 	case coverable && c.needDefaultTag(c.defaultTagValue()):
 		fieldType = "*" + fieldType

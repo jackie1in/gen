@@ -45,6 +45,11 @@ type Config struct {
 	FieldWithIndexTag bool // generate with gorm index tag
 	FieldWithTypeTag  bool // generate with gorm column type tag
 
+	// Soft delete: use 0/1 flag column and a separate time column (GORM mixed mode).
+	// e.g. WithSoftDeleteFlag("is_delete") and WithSoftDeleteAt("update_time") for mixed mode.
+	SoftDeleteFlagColumn string // column name for delete flag (0=active, 1=deleted), e.g. "is_delete"
+	SoftDeleteTimeColumn string // column name for delete time, e.g. "update_time"
+
 	Mode GenerateMode // generate mode
 
 	queryPkgName   string // generated query code's package name
@@ -104,6 +109,26 @@ func (cfg *Config) WithDataTypeMap(newMap map[string]func(columnType gorm.Column
 // WithJSONTagNameStrategy specify json tag naming strategy
 func (cfg *Config) WithJSONTagNameStrategy(ns func(columnName string) (tagContent string)) {
 	cfg.fieldJSONTagNS = ns
+}
+
+// WithSoftDeleteFlag sets the column name for the delete flag (0 = active, 1 = deleted).
+// E.g. WithSoftDeleteFlag("is_delete"). Uses gorm.io/plugin/soft_delete when non-empty.
+// Combine with WithSoftDeleteAt for mixed mode (flag + delete time).
+func (cfg *Config) WithSoftDeleteFlag(column string) {
+	cfg.SoftDeleteFlagColumn = strings.TrimSpace(column)
+}
+
+// WithSoftDeleteAt sets the column name for the delete time (e.g. "deleted_at", "update_time").
+// When set, that column with type time.Time is generated as gorm.DeletedAt.
+// Use alone for time-only soft delete, or with WithSoftDeleteFlag for mixed mode (flag + time).
+func (cfg *Config) WithSoftDeleteAt(column string) {
+	cfg.SoftDeleteTimeColumn = strings.TrimSpace(column)
+}
+
+func (cfg *Config) CheckSoftDeletePlugin() {
+	if cfg.SoftDeleteFlagColumn != "" || cfg.SoftDeleteTimeColumn != "" {
+		cfg.WithImportPkgPath("gorm.io/plugin/soft_delete")
+	}
 }
 
 // WithImportPkgPath specify import package path

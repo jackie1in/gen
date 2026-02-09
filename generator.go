@@ -49,6 +49,7 @@ var concurrent = runtime.NumCPU()
 
 // NewGenerator create a new generator
 func NewGenerator(cfg Config) *Generator {
+	cfg.CheckSoftDeletePlugin()
 	if err := cfg.Revise(); err != nil {
 		panic(fmt.Errorf("create generator fail: %w", err))
 	}
@@ -194,6 +195,9 @@ func (g *Generator) genModelConfig(tableName string, modelName string, modelOpts
 			FieldCoverable:    g.FieldCoverable,
 			FieldWithIndexTag: g.FieldWithIndexTag,
 			FieldWithTypeTag:  g.FieldWithTypeTag,
+
+			SoftDeleteFlagColumn: g.SoftDeleteFlagColumn,
+			SoftDeleteTimeColumn: g.SoftDeleteTimeColumn,
 
 			FieldJSONTagNS: g.fieldJSONTagNS,
 		},

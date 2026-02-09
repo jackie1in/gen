@@ -41,6 +41,10 @@ type FieldConfig struct {
 	FieldWithIndexTag bool // generate with gorm index tag
 	FieldWithTypeTag  bool // generate with gorm column type tag
 
+	// Soft delete (mixed mode): flag column 0/1 + time column for delete time
+	SoftDeleteFlagColumn string // e.g. "is_delete"
+	SoftDeleteTimeColumn string // e.g. "update_time"
+
 	FieldJSONTagNS func(columnName string) string
 
 	ModifyOpts []FieldOption
