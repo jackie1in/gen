@@ -49,7 +49,6 @@ var concurrent = runtime.NumCPU()
 
 // NewGenerator create a new generator
 func NewGenerator(cfg Config) *Generator {
-	cfg.CheckSoftDeletePlugin()
 	if err := cfg.Revise(); err != nil {
 		panic(fmt.Errorf("create generator fail: %w", err))
 	}
